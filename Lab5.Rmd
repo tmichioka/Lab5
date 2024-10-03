@@ -1,0 +1,145 @@
+---
+title: "Lab5"
+author: "Your Name"
+date: "2024-10-03"
+output: "github_document"
+---
+# Load packages and dataset
+```{r}
+library(haven)
+library(ggplot2)
+library(Rmisc)
+library(rstatix)
+library(emmeans)
+library(bruceR)
+library(dplyr)
+library(labelled)
+
+lab5 <- read.csv("C:/Users/Colin/Downloads/lab5data.csv")
+
+```
+
+# Recode Variables
+```{r}
+lab5 <- lab5 %>%
+  mutate_at(c('Gender'),funs(str_replace(., "0", "Men")))
+
+lab5 <- lab5 %>%
+  mutate_at(c('Gender'),funs(str_replace(., "1", "Women")))
+
+lab5 <- lab5 %>%
+  mutate_at(c('Greek'),funs(str_replace(., "0", "No")))
+
+lab5 <- lab5 %>%
+  mutate_at(c('Greek'),funs(str_replace(., "1", "Yes")))
+
+
+```
+# Note that for this lab you will assume assumptions are met, but for your own dataset, you should always check assumptions first
+
+# How to conduct planned contrasts?
+## Step 1: Recode 2x2 into 1x4
+```{r}
+
+lab5$Group <- ifelse(lab5$Gender == "Women" & lab5$Greek == "Yes", "Greek Women", 
+                     ifelse(lab5$Gender == "Men" & lab5$Greek == "Yes", "Greek Men", 
+                            ifelse(lab5$Gender == "Women" & lab5$Greek == "No", "Non-Greek Women", 
+                                   "Non-Greek Men")))
+
+
+```
+
+## Step 2: Write down contrast coefficients
+```{r}
+
+#Here we have 4 groups. 
+
+#Because of the order you coded above, it would assume that 
+#1st group is Greek Women, 
+#2nd group is Greek men, 
+#3rd group is Non-Greek Women,
+#4th group is Non-Greek Men. 
+
+#So if you want to compare Greek Women vs. Greek Men you would write (1, 1, 0, 0)
+
+
+```
+
+## Step 3: Build the model and test it
+```{r}
+
+model <- lm(Drinks ~ Group, data = lab5)
+
+emm<- emmeans(model, "Group")
+
+emm
+
+contrast(emm, list("Greek Women vs. Greek Men" = c(1, 1, 0, 0)))
+
+contrast(emm, list("Greek Main Effect" = c(1, 1, -1, -1)))
+
+contrast(emm, list("Interaction" = c(1, -1, -1, 1)))
+
+
+#Note that even though you can still test main effects and interaction using the contrast method, but if all you're interested is main effects and interaction, the method below is probably easier.
+
+```
+
+# How to test 2x2, main effects and interaction then simple effects
+```{r}
+
+#Please note here that the t statistics may look slightly different than the contrast method above, but the overall interpretation shouldn't change
+
+#Also please note that this method is okay, but you're sort of thinking about what the results mean after seeing the full results, whereas for contrasts you need to understand what you're testing first before running the test
+
+mod<-MANOVA(lab5, dv = "Drinks", between = c("Gender", "Greek")) 
+
+EMMEANS(mod, effect = "Gender", by = "Greek", p.adjust = "none")
+
+EMMEANS(mod, effect = "Greek", by = "Gender", p.adjust = "none")
+
+#Since we already coded 2x2 into 1x4, below is another way to test the simple effects, but it's basically post-hocs. I did not use p value adjustment here, but you can change it to bonferroni or something else for your own data.
+#MANOVA(b, dv = "Drinks", between = c("Group")) %>%
+  #EMMEANS("Group", p.adjust = "none")
+
+```
+# Visualize your results using bar graphs
+```{r}
+#Bar graphs are different than the graphs you made before. You first need to computed the mean scores and standard errors for bar graphs.
+
+lab5_clean <- lab5 %>%
+  drop_na(Drinks)
+
+plot<-summarySE(lab5_clean, measurevar="Drinks", groupvars=c("Gender", "Greek"))
+
+plot
+
+plot2<-summarySE(lab5_clean, measurevar="Drinks", groupvars=c("Group"))
+
+plot2
+
+ggplot(plot, aes(x = Greek, y = Drinks, fill = Greek)) +
+  geom_col() + facet_wrap(~ Gender) + theme_bruce()
+
+ggplot(plot2, aes(x = Group, y = Drinks, fill = Group)) +
+  geom_col()  + theme_bruce() + theme(axis.text.x = element_text(angle = -10))
+
+```
+
+# Q1: You hypothesized that Greek Women have a lower GPA than non-Greek women. Conduct the correct analysis below and explain whether or not your hypothesis is supported. 
+```{r}
+
+
+
+```
+
+# Q2: You hypothesized that on average women have a higher GPA than men. Conduct the correct analysis below and explain whether or not your hypothesis is supported. 
+```{r}
+
+
+```
+
+# Q3: Create a bar graph to compare GPA by gender and greek (either graph works)
+```{r}
+
+```
