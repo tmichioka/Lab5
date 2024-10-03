@@ -127,7 +127,7 @@ ggplot(plot2, aes(x = Group, y = Drinks, fill = Group)) +
 ```
 
 # Q1: You hypothesized that Greek Women have a lower GPA than non-Greek women. Conduct the correct analysis below and explain whether or not your hypothesis is supported. 
-# Answer: My hypothesis was not supported since the p value for the simple effect comparing GPA of Greek women and non-greek women is higher than the threshold .05. 
+# Answer: My hypothesis was not supported since the p value for the ssimple effect comparing GPA of Greek women and non-greek women is higher than the threshold .05. 
 ```{r}
 
 model <- lm(GPA ~ Group, data = lab5)
@@ -138,7 +138,7 @@ emm
 
 contrast(emm, list("Greek Women vs. non-Greek women" = c(-1, 0, 1, 0)))
 
-=
+
 ```
 
 
