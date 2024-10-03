@@ -91,7 +91,7 @@ library(bruceR)
 library(dplyr)
 library(labelled)
 
-lab5 <- read.csv("C:/Users/Colin/Downloads/lab5data.csv")
+lab5 <- read.csv("C:/Users/Colin/Documents/GitHub/Website/Lab5/lab5data.csv")
 ```
 
 # Recode Variables
